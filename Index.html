@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>阴阳师打卡课程表</title>
+<style>
+:root{--bg:#f1f5f9;--card:#fff;--primary:#2563eb;--accent:#dc2626;--text:#0f172a;--muted:#64748b;--border:#e2e8f0;--ok:#059669;--soft:#f8fafc;--today:#eff6ff;--chip:#e0e7ff;--chipt:#3730a3;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1220;--card:#162033;--text:#e5e7eb;--muted:#94a3b8;--border:#2a3750;--soft:#1c2940;--today:#1e3358;--chip:#312e81;--chipt:#e0e7ff;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0b1220;--card:#162033;--text:#e5e7eb;--muted:#94a3b8;--border:#2a3750;--soft:#1c2940;--today:#1e3358;--chip:#312e81;--chipt:#e0e7ff;color-scheme:dark}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;padding:14px;line-height:1.45}
+.wrap{max-width:1100px;margin:0 auto}
+.head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding-bottom:12px;border-bottom:2px solid var(--border);margin-bottom:14px}
+h1{font-size:20px}.head p{font-size:12px;color:var(--muted);margin-top:2px}
+button{background:var(--accent);color:#fff;border:0;border-radius:8px;padding:9px 14px;font-size:13px;font-weight:600}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px}
+.ch{padding:12px 14px;font-weight:700;font-size:15px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.badge{font-size:11px;font-weight:500;background:var(--chip);color:var(--chipt);border-radius:99px;padding:2px 8px}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:separate;border-spacing:0;width:100%;min-width:760px}
+th,td{border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:6px;vertical-align:top;font-size:12.5px}
+th{background:var(--soft);font-size:13px;text-align:center;position:sticky;top:0}
+th small{display:block;font-weight:400;color:var(--muted);font-size:11px}
+th.today{background:var(--primary);color:#fff}th.today small{color:#dbeafe}
+td.today{background:var(--today)}
+.slot{position:sticky;left:0;z-index:2;background:var(--soft);min-width:64px;width:64px;font-weight:700;text-align:center;font-size:12px}
+.slot small{display:block;font-weight:400;color:var(--muted);font-size:10.5px}
+th.slot{z-index:3}
+tr:last-child td,tr:last-child th{border-bottom:0}
+td:last-child,th:last-child{border-right:0}
+.t{display:flex;align-items:flex-start;gap:5px;padding:4px 3px;border-radius:6px;cursor:pointer;user-select:none;-webkit-user-select:none}
+.t input{width:16px;height:16px;margin-top:1px;flex:none}
+.t.on span{text-decoration:line-through;color:var(--muted)}
+.none{color:var(--muted);text-align:center;font-size:11px;padding-top:6px}
+.body{padding:12px 14px;display:flex;flex-wrap:wrap;gap:8px}
+.body .t{background:var(--soft);border:1px solid var(--border);padding:8px 12px;font-size:13.5px;border-radius:8px}
+.sh{font-weight:700;font-size:16px;margin:6px 0 10px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px}
+.sh small{font-weight:400;font-size:12px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px}
+.sub{border-top:4px solid var(--ok);margin:0}
+.sub .sb{padding:8px 12px}
+.sub .t{padding:6px 4px;font-size:13.5px}
+.nm{font-size:15px;font-weight:700}
+.lv{display:inline-flex;align-items:center;background:var(--chip);color:var(--chipt);border-radius:6px;padding:1px 6px;font-size:12px;font-weight:600;margin-left:6px}
+.lv input{width:38px;border:1px solid var(--border);border-radius:4px;text-align:center;font-size:13px;background:var(--card);color:var(--text);margin-left:2px}
+.em{font-size:11.5px;color:var(--muted);font-weight:400;margin-top:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <div><h1>⛩️ 阴阳师打卡课程表</h1><p>大号按周课表打卡，今天自动高亮 · 每周一自动清空</p></div>
+    <button onclick="resetAll()">一键重置</button>
+  </div>
+
+  <div class="card">
+    <div class="ch"><span>👑 大号 · 周课表</span><span class="badge">左右滑动查看</span></div>
+    <div class="scroll"><table id="tt"></table></div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><span>📆 本周任务</span><span class="badge">每周一重置</span></div>
+    <div class="body" id="weekly"></div>
+  </div>
+
+  <div class="sh"><span>👥 小号打卡（共 9 个）</span><small>等级可直接修改，自动保存</small></div>
+  <div class="grid" id="subs"></div>
+</div>
+
+<script>
+var DAYS=["周一","周二","周三","周四","周五","周六","周日"];
+var ALL=function(a){return [a,a,a,a,a,a,a]};
+var FRI=["寮宴会","狭间","阴界之门"], SAT=["首领退治","狭间","阴界之门"], DAO=["道馆"];
+var SLOTS=[
+ {n:"上午",s:"全天可做",d:ALL(["大神签到","一键完成","拿御魂","地鬼混勾玉","金币妖怪×2","悬赏封印×2","寮30"])},
+ {n:"18:00",s:"后",d:ALL(["逢魔之时"])},
+ {n:"19:00",s:"寮活动",d:[DAO,DAO,DAO,DAO,FRI,SAT,FRI]},
+ {n:"21:00",s:"后",d:ALL(["寮突破"])}
+];
+var WEEKLY=["每周斗技低保","每周兑换商店"];
+var SUBTASKS=["捐勋章","每日签到","每日一抽","借式神（50次）","寮30 / 麒麟 / 阴界之门"];
+var SUBS=[["玄离","715","21"],["无限","01","21"],["小黑","02","21"],["老君","03","21"],["谛听","04","21"],["清凝","05","21"],["鹿野","07","9"],["罗吒","08","9"],["酱牛肉","09",""]];
+var KEY="yys_schedule_v1", S={c:{},w:"",l:{}};
+
+function load(){try{var r=localStorage.getItem(KEY);if(r){var o=JSON.parse(r);if(o&&o.c)S=o}}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function weekId(){var d=new Date(),dow=(d.getDay()+6)%7;d.setDate(d.getDate()-dow);return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()}
+function todayIdx(){return (new Date().getDay()+6)%7}
+
+function item(k,txt,mainKey){
+  var on=!!S.c[k];
+  return '<label class="t'+(on?' on':'')+'"><input type="checkbox" '+(on?'checked ':'')+'data-k="'+k+'"><span>'+txt+'</span></label>';
+}
+function render(){
+  var td=todayIdx(), h='<tr><th class="slot">时间</th>';
+  for(var d=0;d<7;d++){
+    var tot=0,done=0;
+    SLOTS.forEach(function(s,si){s.d[d].forEach(function(t,ti){tot++;if(S.c["m|"+si+"|"+d+"|"+ti])done++})});
+    h+='<th class="'+(d===td?'today':'')+'">'+DAYS[d]+(d===td?'（今）':'')+'<small>'+done+'/'+tot+'</small></th>';
+  }
+  h+='</tr>';
+  SLOTS.forEach(function(s,si){
+    h+='<tr><td class="slot">'+s.n+'<small>'+s.s+'</small></td>';
+    for(var d=0;d<7;d++){
+      h+='<td class="'+(d===td?'today':'')+'">';
+      s.d[d].forEach(function(t,ti){h+=item("m|"+si+"|"+d+"|"+ti,t)});
+      h+='</td>';
+    }
+    h+='</tr>';
+  });
+  document.getElementById("tt").innerHTML=h;
+
+  var w="";WEEKLY.forEach(function(t,i){w+=item("w|"+i,t)});
+  document.getElementById("weekly").innerHTML=w;
+
+  var g="";
+  SUBS.forEach(function(a,i){
+    g+='<div class="card sub"><div class="ch" style="display:block"><div><span class="nm">'+(i+1)+'. '+a[0]+'</span><span class="lv">Lv.<input type="text" data-l="'+i+'" value="'+((S.l[i]!==undefined?S.l[i]:a[2]))+'" placeholder="-"></span></div><div class="em">'+a[1]+'</div></div><div class="sb">';
+    SUBTASKS.forEach(function(t,ti){g+=item("s|"+i+"|"+ti,t)});
+    g+='</div></div>';
+  });
+  document.getElementById("subs").innerHTML=g;
+}
+document.addEventListener("change",function(e){
+  var el=e.target;
+  if(el.dataset&&el.dataset.k){
+    if(el.checked)S.c[el.dataset.k]=1;else delete S.c[el.dataset.k];
+    save();render();
+  }
+});
+document.addEventListener("input",function(e){
+  var el=e.target;
+  if(el.dataset&&el.dataset.l!==undefined){S.l[el.dataset.l]=el.value;save()}
+});
+function resetAll(){
+  if(confirm("确定清空所有打卡记录吗？（小号等级会保留）")){S.c={};save();render()}
+}
+load();
+var wk=weekId();
+if(S.w!==wk){
+  // new week: clear main grid + weekly, keep sub-account daily ticks as-is
+  Object.keys(S.c).forEach(function(k){if(k.charAt(0)!=="s")delete S.c[k]});
+  S.w=wk;save();
+}
+render();
+</script>
+</body>
+</html>
